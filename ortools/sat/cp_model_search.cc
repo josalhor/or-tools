@@ -939,7 +939,7 @@ std::vector<SatParameters> GetFullWorkerParameters(
     if (cp_model.has_objective() && !cp_model.objective().vars().empty()) {
       // Disable core search if there is only 1 term in the objective.
       if (cp_model.objective().vars().size() == 1 &&
-          params.optimize_with_core() && !params.use_core_for_feasibility()) {
+          params.optimize_with_core()) {
         continue;
       }
 
@@ -956,9 +956,7 @@ std::vector<SatParameters> GetFullWorkerParameters(
     } else {
       // Remove subsolvers that require an objective.
       if (params.optimize_with_lb_tree_search()) continue;
-      if (params.optimize_with_core() && !params.use_core_for_feasibility()) {
-        continue;
-      }
+      if (params.optimize_with_core()) continue;
       if (params.use_objective_lb_search()) continue;
       if (params.use_objective_shaving_search()) continue;
       if (params.search_branching() == SatParameters::LP_SEARCH) continue;

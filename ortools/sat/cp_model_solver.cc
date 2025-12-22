@@ -1040,17 +1040,21 @@ class FullProblemSolver : public SubSolver {
   FullProblemSolver(absl::string_view name,
                     const SatParameters& local_parameters, bool split_in_chunks,
                     SharedClasses* shared, bool stop_at_first_solution = false)
-      : SubSolver(name, stop_at_first_solution ? FIRST_SOLUTION : FULL_PROBLEM),
+      : SubSolver(name, (stop_at_first_solution ||
+                         local_parameters.use_core_for_feasibility())
+                            ? FIRST_SOLUTION
+                            : FULL_PROBLEM),
         shared_(shared),
         split_in_chunks_(split_in_chunks),
-        stop_at_first_solution_(stop_at_first_solution),
+        stop_at_first_solution_(stop_at_first_solution ||
+                                local_parameters.use_core_for_feasibility()),
         local_model_(SubSolver::name()) {
     // Setup the local model parameters and time limit.
     *(local_model_.GetOrCreate<SatParameters>()) = local_parameters;
     shared_->time_limit->UpdateLocalLimit(
         local_model_.GetOrCreate<TimeLimit>());
 
-    if (stop_at_first_solution) {
+    if (stop_at_first_solution_) {
       local_model_.GetOrCreate<TimeLimit>()
           ->RegisterSecondaryExternalBooleanAsLimit(
               shared_->response->first_solution_solvers_should_stop());
@@ -1110,24 +1114,11 @@ class FullProblemSolver : public SubSolver {
       previous_task_is_completed_ = false;
     }
     return [this]() {
-      const bool use_core_for_feasibility =
-          local_model_.GetOrCreate<SatParameters>()->use_core_for_feasibility();
       if (solving_first_chunk_) {
-        if (use_core_for_feasibility) {
-          CpModelProto* local_proto = local_model_.GetOrCreate<CpModelProto>();
-          *local_proto = shared_->model_proto;
-          local_proto->mutable_objective()->clear_vars();
-          local_proto->mutable_objective()->clear_coeffs();
-          local_proto->mutable_objective()->clear_domain();
-          LoadCpModel(*local_proto, &local_model_);
-        } else {
-          LoadCpModel(shared_->model_proto, &local_model_);
-        }
+        LoadCpModel(shared_->model_proto, &local_model_);
       }
 
-      const CpModelProto& model_proto =
-          use_core_for_feasibility ? *local_model_.GetOrCreate<CpModelProto>()
-                                   : shared_->model_proto;
+      const CpModelProto& model_proto = shared_->model_proto;
 
       if (solving_first_chunk_) {
         // Level zero variable bounds sharing. It is important to register
