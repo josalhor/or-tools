@@ -1110,18 +1110,35 @@ class FullProblemSolver : public SubSolver {
       previous_task_is_completed_ = false;
     }
     return [this]() {
+      const bool use_core_for_feasibility =
+          local_model_.GetOrCreate<SatParameters>()->use_core_for_feasibility();
       if (solving_first_chunk_) {
-        LoadCpModel(shared_->model_proto, &local_model_);
+        if (use_core_for_feasibility) {
+          CpModelProto* local_proto = local_model_.GetOrCreate<CpModelProto>();
+          *local_proto = shared_->model_proto;
+          local_proto->mutable_objective()->clear_vars();
+          local_proto->mutable_objective()->clear_coeffs();
+          local_proto->mutable_objective()->clear_domain();
+          LoadCpModel(*local_proto, &local_model_);
+        } else {
+          LoadCpModel(shared_->model_proto, &local_model_);
+        }
+      }
 
+      const CpModelProto& model_proto =
+          use_core_for_feasibility ? *local_model_.GetOrCreate<CpModelProto>()
+                                   : shared_->model_proto;
+
+      if (solving_first_chunk_) {
         // Level zero variable bounds sharing. It is important to register
         // that after the probing that takes place in LoadCpModel() otherwise
         // we will have a mutex contention issue when all the thread probes
         // at the same time.
         if (shared_->bounds != nullptr) {
           RegisterVariableBoundsLevelZeroExport(
-              shared_->model_proto, shared_->bounds.get(), &local_model_);
+              model_proto, shared_->bounds.get(), &local_model_);
           RegisterVariableBoundsLevelZeroImport(
-              shared_->model_proto, shared_->bounds.get(), &local_model_);
+              model_proto, shared_->bounds.get(), &local_model_);
         }
 
         // Note that this is done after the loading, so we will never export
@@ -1129,7 +1146,7 @@ class FullProblemSolver : public SubSolver {
         if (shared_->clauses != nullptr) {
           const int id = shared_->clauses->RegisterNewId(
               /*may_terminate_early=*/stop_at_first_solution_ &&
-              local_model_.GetOrCreate<CpModelProto>()->has_objective());
+              model_proto.has_objective());
           shared_->clauses->SetWorkerNameForId(id, local_model_.Name());
 
           RegisterClausesLevelZeroImport(id, shared_->clauses.get(),
@@ -1144,9 +1161,9 @@ class FullProblemSolver : public SubSolver {
                                name(), shared_->wall_timer->Get()));
 
         if (local_model_.GetOrCreate<SatParameters>()->repair_hint()) {
-          MinimizeL1DistanceWithHint(shared_->model_proto, &local_model_);
+          MinimizeL1DistanceWithHint(model_proto, &local_model_);
         } else {
-          QuickSolveWithHint(shared_->model_proto, &local_model_);
+          QuickSolveWithHint(model_proto, &local_model_);
         }
 
         SOLVER_LOG(logger,
@@ -1175,7 +1192,7 @@ class FullProblemSolver : public SubSolver {
       }
 
       const double saved_dtime = time_limit->GetElapsedDeterministicTime();
-      SolveLoadedCpModel(shared_->model_proto, &local_model_);
+      SolveLoadedCpModel(model_proto, &local_model_);
 
       absl::MutexLock mutex_lock(&mutex_);
       previous_task_is_completed_ = true;

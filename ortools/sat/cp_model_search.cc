@@ -543,6 +543,15 @@ absl::flat_hash_map<std::string, SatParameters> GetNamedParameters(
     strategies["core"] = new_params;
   }
 
+  {
+    SatParameters new_params = base_params;
+    new_params.set_search_branching(SatParameters::AUTOMATIC_SEARCH);
+    new_params.set_optimize_with_core(true);
+    new_params.set_linearization_level(0);
+    new_params.set_use_core_for_feasibility(true);
+    strategies["core_feasibility"] = new_params;
+  }
+
   // It can be interesting to try core and lp.
   {
     SatParameters new_params = base_params;
@@ -930,7 +939,7 @@ std::vector<SatParameters> GetFullWorkerParameters(
     if (cp_model.has_objective() && !cp_model.objective().vars().empty()) {
       // Disable core search if there is only 1 term in the objective.
       if (cp_model.objective().vars().size() == 1 &&
-          params.optimize_with_core()) {
+          params.optimize_with_core() && !params.use_core_for_feasibility()) {
         continue;
       }
 
@@ -947,7 +956,9 @@ std::vector<SatParameters> GetFullWorkerParameters(
     } else {
       // Remove subsolvers that require an objective.
       if (params.optimize_with_lb_tree_search()) continue;
-      if (params.optimize_with_core()) continue;
+      if (params.optimize_with_core() && !params.use_core_for_feasibility()) {
+        continue;
+      }
       if (params.use_objective_lb_search()) continue;
       if (params.use_objective_shaving_search()) continue;
       if (params.search_branching() == SatParameters::LP_SEARCH) continue;
@@ -1014,6 +1025,17 @@ std::vector<SatParameters> GetFirstSolutionBaseParams(
     SatParameters new_params = get_base(true);
     new_params.set_name("fj");
     new_params.set_feasibility_jump_linearization_level(0);
+    result.push_back(new_params);
+  }
+
+  // Add core feasibility.
+  {
+    SatParameters new_params = get_base(false);
+    new_params.set_name("core_feasibility");
+    new_params.set_search_branching(SatParameters::AUTOMATIC_SEARCH);
+    new_params.set_optimize_with_core(true);
+    new_params.set_linearization_level(0);
+    new_params.set_use_core_for_feasibility(true);
     result.push_back(new_params);
   }
 
