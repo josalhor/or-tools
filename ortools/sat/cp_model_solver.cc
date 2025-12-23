@@ -1040,14 +1040,13 @@ class FullProblemSolver : public SubSolver {
   FullProblemSolver(absl::string_view name,
                     const SatParameters& local_parameters, bool split_in_chunks,
                     SharedClasses* shared, bool stop_at_first_solution = false)
-      : SubSolver(name, (stop_at_first_solution ||
-                         local_parameters.use_core_for_feasibility())
+      : SubSolver(name, (stop_at_first_solution || name == "core_feasibility")
                             ? FIRST_SOLUTION
                             : FULL_PROBLEM),
         shared_(shared),
         split_in_chunks_(split_in_chunks),
         stop_at_first_solution_(stop_at_first_solution ||
-                                local_parameters.use_core_for_feasibility()),
+                                name == "core_feasibility"),
         local_model_(SubSolver::name()) {
     // Setup the local model parameters and time limit.
     *(local_model_.GetOrCreate<SatParameters>()) = local_parameters;

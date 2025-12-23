@@ -1,0 +1,116 @@
+Use one of the following targets:
+help, help_all: Print this help.
+all: Build OR-Tools for all available languages.
+check, check_all: Check OR-Tools for all available languages.
+test, test_all: Test OR-Tools for all available languages.
+clean, clean_all: Clean output from previous build for all available languages (won't clean third party).
+detect, detect_all: Show variables used to build OR-Tools for all available languages.
+
+Use one of the following C++ targets:
+help_cpp            Generate list of C++ targets with descriptions.
+detect_cpp          Show variables used to build C++ OR-Tools.
+third_party         Build OR-Tools Prerequisite
+cpp                 Build C++ OR-Tools library.
+check_cpp           Run all C++ OR-Tools samples and examples targets.
+test_cpp            Run all C++ OR-Tools test targets.
+test_fz             Run all Flatzinc test targets.
+archive_cpp         Add C++ OR-Tools to archive.
+clean_cpp           Clean C++ output from previous build.
+build               Build a C++ program.
+run                 Run a C++ program.
+test_cpp_algorithms_samples             Build and Run all C++ Algorithms Samples (located in ortools/algorithms/samples)
+test_cpp_graph_samples                  Build and Run all C++ Graph Samples (located in ortools/graph/samples)
+test_cpp_constraint_solver_samples      Build and Run all C++ CP Samples (located in ortools/constraint_solver/samples)
+test_cpp_linear_solver_samples          Build and Run all C++ LP Samples (located in ortools/linear_solver/samples)
+test_cpp_model_builder_samples          Build and Run all C++ CP Samples (located in ortools/model_builder/samples)
+test_cpp_pdlp_samples                   Build and Run all C++ CP Samples (located in ortools/model_builder/samples)
+test_cpp_sat_samples                    Build and Run all C++ Sat Samples (located in ortools/sat/samples)
+test_cc_tests       Build and Run all C++ Tests (located in examples/tests)
+test_cc_contrib     Build and Run all C++ Contrib (located in examples/contrib)
+test_cc_cpp         Build and Run all C++ Examples (located in examples/cpp)
+test_archive_cpp    Test C++ OR-Tools archive is OK.
+
+Use one of the following dotnet targets:
+help_dotnet         Generate list of dotnet targets with descriptions.
+detect_dotnet       Show variables used to build dotnet OR-Tools.
+dotnet              Build .Net OR-Tools library.
+check_dotnet        Quick check only running .Net OR-Tools samples.
+test_dotnet         Run all .Net OR-Tools test targets.
+archive_dotnet      Add C++ OR-Tools to archive.
+clean_dotnet        Clean files
+build               Build a .Net C# program.
+run                 Run a .Net C# program (using 'dotnet run').
+run_test            Run a .Net C# program (using 'dotnet test').
+test_dotnet_algorithms_samples          Build and Run all .Net LP Samples (located in ortools/algorithms/samples)
+test_dotnet_constraint_solver_samples   Build and Run all .Net CP Samples (located in ortools/constraint_solver/samples)
+test_dotnet_graph_samples               Build and Run all .Net LP Samples (located in ortools/graph/samples)
+test_dotnet_linear_solver_samples       Build and Run all .Net LP Samples (located in ortools/linear_solver/samples)
+test_dotnet_sat_samples                 Build and Run all .Net SAT Samples (located in ortools/sat/samples)
+test_dotnet_tests   Build and Run all .Net Tests (located in examples/test and ortools/<cmp>/csharp)
+test_dotnet_contrib Build and Run all .Net Examples (located in examples/contrib)
+test_dotnet_dotnet  Build and Run all .Net Examples (located in examples/dotnet)
+test_archive_dotnet Test C++ OR-Tools archive is OK.
+dotnet_examples_archive                 Build stand-alone C++ examples archive file for redistribution.
+nuget_archive       Build .Net "Google.OrTools" Nuget Package
+nuget_upload        Upload Nuget Package
+
+Use one of the following Java targets:
+help_java               Generate list of Java targets with descriptions.
+detect_java             Show variables used to build Java OR-Tools.
+java_runtime            Build Java OR-Tools runtime.
+java                    Build Java OR-Tools.
+check_java              Quick check only running Java OR-Tools samples.
+test_java               Test Java OR-Tools using various examples.
+archive_java            Generate OR-Tools's maven archive.
+clean_java              Clean Java output from previous build.
+build                   Build a Java program.
+run                     Run a Java program.
+test_java_algorithms_samples                    Build and Run all Java Algorithms Samples (located in ortools/algorithms/samples)
+test_java_constraint_solver_samples             Build and Run all Java CP Samples (located in ortools/constraint_solver/samples)
+test_java_graph_samples Build and Run all Java Graph Samples (located in ortools/graph/samples)
+test_java_linear_solver_samples                 Build and Run all Java LP Samples (located in ortools/linear_solver/samples)
+test_java_model_builder_samples                 Build and Run all Java MB Samples (located in ortools/model_builder/samples)
+test_java_sat_samples   Build and Run all Java SAT Samples (located in ortools/sat/samples)
+test_java_tests         Build and Run all Java Tests (located in examples/tests)
+test_java_contrib       Build and Run all Java Contrib (located in examples/contrib)
+test_java_java          Build and Run all Java Examples (located in examples/java)
+test_archive_java       Test C++ OR-Tools archive is OK.
+java_examples_archive   Build stand-alone Java examples archive file for redistribution.
+
+Use one of the following Python targets:
+help_python             Generate list of Python targets with descriptions.
+detect_python           Show variables used to build Python OR-Tools.
+python                  Build Python OR-Tools.
+check_python            Quick check only running Python OR-Tools samples.
+test_python             Run all Python OR-Tools test targets.
+archive_python          Generate Python OR-Tools archive.
+clean_python            Clean Python output from previous build.
+package_python          Create Python ortools Wheel package.
+test_package_python     Test Python "ortools" Wheel package
+install_python          Install Python OR-Tools on the host system
+run                     Run a Python program.
+test_python_algorithms_samples                  Run all Python Algorithms Samples (located in ortools/algorithms/samples)
+test_python_constraint_solver_samples           Run all Python CP Samples (located in ortools/constraint_solver/samples)
+test_python_graph_samples                       Run all Python Graph Samples (located in ortools/graph/samples)
+test_python_linear_solver_samples               Run all Python LP Samples (located in ortools/linear_solver/samples)
+test_python_model_builder_samples               Run all Python Model Builder Samples (located in ortools/model_builder/samples)
+test_python_sat_samples Run all Python Sat Samples (located in ortools/sat/samples)
+test_python_tests       Run all Python Tests (located in examples/tests)
+test_python_contrib     Run all Python Contrib (located in examples/python and examples/contrib)
+test_python_python      Build and Run all Python Examples (located in examples/python)
+uninstall_python        Uninstall Python OR-Tools from the host system
+python_examples_archive Build stand-alone Python examples archive file for redistribution.
+test_archive_python     Test C++ OR-Tools archive is OK.
+
+Use one of the following Archive targets:
+help_archive        Generate list of Archive targets with descriptions.
+clean_archive       Clean Archive output from previous build.
+detect_archive      Show variables used to build archive OR-Tools.
+
+Use one of the following Documentation targets:
+help_doc            Generate list of Documentation targets with descriptions.
+doc                 Create doxygen and python documentation.
+doxy-doc            Create doxygen ref documentation.
+java-doc            Create Javadoc ref documentation.
+python-doc          Create python documentation.
+

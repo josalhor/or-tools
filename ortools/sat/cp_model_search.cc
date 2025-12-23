@@ -548,7 +548,6 @@ absl::flat_hash_map<std::string, SatParameters> GetNamedParameters(
     new_params.set_search_branching(SatParameters::AUTOMATIC_SEARCH);
     new_params.set_optimize_with_core(true);
     new_params.set_linearization_level(0);
-    new_params.set_use_core_for_feasibility(true);
     strategies["core_feasibility"] = new_params;
   }
 
@@ -1033,7 +1032,6 @@ std::vector<SatParameters> GetFirstSolutionBaseParams(
     new_params.set_search_branching(SatParameters::AUTOMATIC_SEARCH);
     new_params.set_optimize_with_core(true);
     new_params.set_linearization_level(0);
-    new_params.set_use_core_for_feasibility(true);
     result.push_back(new_params);
   }
 

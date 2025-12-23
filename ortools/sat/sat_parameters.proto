@@ -1116,7 +1116,6 @@ message SatParameters {
 
   // If true, the core-guided search will be used to find a first solution
   // for feasibility only, ignoring any objective in the model.
-  optional bool use_core_for_feasibility = 319 [default = false];
 
   // Do a more conventional tree search (by opposition to SAT based one) where
   // we keep all the explored node in a tree. This is meant to be used in a
