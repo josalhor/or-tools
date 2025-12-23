@@ -1047,7 +1047,6 @@ class FullProblemSolver : public SubSolver {
         split_in_chunks_(split_in_chunks),
         stop_at_first_solution_(stop_at_first_solution ||
                                 name == "core_feasibility"),
-        is_core_feasibility_(name == "core_feasibility"),
         local_model_(SubSolver::name()) {
     // Setup the local model parameters and time limit.
     *(local_model_.GetOrCreate<SatParameters>()) = local_parameters;
@@ -1118,7 +1117,7 @@ class FullProblemSolver : public SubSolver {
         // For core_feasibility, we want to solve only the SAT part without
         // considering the optimization objective. Create a copy of the model
         // without the objective.
-        if (is_core_feasibility_ && shared_->model_proto.has_objective()) {
+        if (name() == "core_feasibility" && shared_->model_proto.has_objective()) {
           model_proto_without_objective_ = shared_->model_proto;
           model_proto_without_objective_.clear_objective();
           LoadCpModel(model_proto_without_objective_, &local_model_);
@@ -1132,7 +1131,7 @@ class FullProblemSolver : public SubSolver {
 
       // Use the appropriate model proto based on whether this is core_feasibility
       const CpModelProto& model_proto = 
-          (is_core_feasibility_ && shared_->model_proto.has_objective())
+          (name() == "core_feasibility" && shared_->model_proto.has_objective())
               ? model_proto_without_objective_
               : shared_->model_proto;
 
@@ -1222,7 +1221,6 @@ class FullProblemSolver : public SubSolver {
   SharedClasses* shared_;
   const bool split_in_chunks_;
   const bool stop_at_first_solution_;
-  const bool is_core_feasibility_;
   Model local_model_;
   CpModelProto model_proto_without_objective_;
 
