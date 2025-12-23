@@ -4806,6 +4806,83 @@ TEST(PresolveCpModelTest, CumulativeBug4) {
   response = SolveWithParameters(cp_model, params);
   EXPECT_EQ(response.status(), CpSolverStatus::OPTIMAL);
 }
+
+// Test that core_feasibility strategy works correctly by solving the SAT part
+// without considering the optimization objective.
+TEST(SolveCpModelTest, CoreFeasibilityIgnoresObjective) {
+  // Create a simple optimization problem that is SAT but has an objective.
+  const CpModelProto model_proto = ParseTestProto(R"pb(
+    variables { domain: 0 domain: 10 }
+    variables { domain: 0 domain: 10 }
+    constraints {
+      linear {
+        vars: [ 0, 1 ]
+        coeffs: [ 1, 1 ]
+        domain: [ 5, 15 ]
+      }
+    }
+    objective {
+      vars: [ 0, 1 ]
+      coeffs: [ 1, 1 ]
+      scaling_factor: 1
+    }
+  )pb");
+
+  // Solve with core_feasibility strategy
+  Model model;
+  SatParameters params;
+  params.set_log_search_progress(false);
+  params.set_num_workers(1);
+  params.set_subsolvers("core_feasibility");
+  model.Add(NewSatParameters(params));
+  
+  const CpSolverResponse response = SolveCpModel(model_proto, &model);
+  
+  // Should find a feasible solution (not necessarily optimal)
+  EXPECT_THAT(response.status(), 
+              AnyOf(CpSolverStatus::FEASIBLE, CpSolverStatus::OPTIMAL));
+  
+  // Verify the solution is feasible
+  EXPECT_TRUE(SolutionIsFeasible(
+      model_proto, 
+      std::vector<int64_t>(response.solution().begin(), 
+                          response.solution().end())));
+}
+
+// Test that core_feasibility doesn't incorrectly report UNSAT on SAT problems
+TEST(SolveCpModelTest, CoreFeasibilityDoesNotReportUnsatOnSat) {
+  // Create a simple SAT problem with an objective
+  const CpModelProto model_proto = ParseTestProto(R"pb(
+    variables { domain: 0 domain: 1 }
+    variables { domain: 0 domain: 1 }
+    variables { domain: 0 domain: 1 }
+    constraints {
+      bool_or {
+        literals: [ 0, 1, 2 ]
+      }
+    }
+    objective {
+      vars: [ 0, 1, 2 ]
+      coeffs: [ 1, 1, 1 ]
+      scaling_factor: 1
+    }
+  )pb");
+
+  Model model;
+  SatParameters params;
+  params.set_log_search_progress(false);
+  params.set_num_workers(1);
+  params.set_subsolvers("core_feasibility");
+  model.Add(NewSatParameters(params));
+  
+  const CpSolverResponse response = SolveCpModel(model_proto, &model);
+  
+  // Should definitely not be INFEASIBLE since the problem is SAT
+  EXPECT_NE(response.status(), CpSolverStatus::INFEASIBLE);
+  EXPECT_THAT(response.status(), 
+              AnyOf(CpSolverStatus::FEASIBLE, CpSolverStatus::OPTIMAL));
+}
+
 #endif  // !defined(__EMBEDDED_PLATFORM__)
 
 }  // namespace
