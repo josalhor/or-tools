@@ -1047,6 +1047,7 @@ class FullProblemSolver : public SubSolver {
         split_in_chunks_(split_in_chunks),
         stop_at_first_solution_(stop_at_first_solution ||
                                 name == "core_feasibility"),
+        is_core_feasibility_(name == "core_feasibility"),
         local_model_(SubSolver::name()) {
     // Setup the local model parameters and time limit.
     *(local_model_.GetOrCreate<SatParameters>()) = local_parameters;
@@ -1114,10 +1115,26 @@ class FullProblemSolver : public SubSolver {
     }
     return [this]() {
       if (solving_first_chunk_) {
-        LoadCpModel(shared_->model_proto, &local_model_);
+        // For core_feasibility, we want to solve only the SAT part without
+        // considering the optimization objective. Create a copy of the model
+        // without the objective.
+        if (is_core_feasibility_ && shared_->model_proto.has_objective()) {
+          model_proto_without_objective_ = shared_->model_proto;
+          model_proto_without_objective_.clear_objective();
+          LoadCpModel(model_proto_without_objective_, &local_model_);
+          // Since we removed the objective, also turn off optimize_with_core
+          // to avoid any confusion in the solving logic.
+          local_model_.GetOrCreate<SatParameters>()->set_optimize_with_core(false);
+        } else {
+          LoadCpModel(shared_->model_proto, &local_model_);
+        }
       }
 
-      const CpModelProto& model_proto = shared_->model_proto;
+      // Use the appropriate model proto based on whether this is core_feasibility
+      const CpModelProto& model_proto = 
+          (is_core_feasibility_ && shared_->model_proto.has_objective())
+              ? model_proto_without_objective_
+              : shared_->model_proto;
 
       if (solving_first_chunk_) {
         // Level zero variable bounds sharing. It is important to register
@@ -1136,7 +1153,7 @@ class FullProblemSolver : public SubSolver {
         if (shared_->clauses != nullptr) {
           const int id = shared_->clauses->RegisterNewId(
               /*may_terminate_early=*/stop_at_first_solution_ &&
-              model_proto.has_objective());
+              shared_->model_proto.has_objective());
           shared_->clauses->SetWorkerNameForId(id, local_model_.Name());
 
           RegisterClausesLevelZeroImport(id, shared_->clauses.get(),
@@ -1205,7 +1222,9 @@ class FullProblemSolver : public SubSolver {
   SharedClasses* shared_;
   const bool split_in_chunks_;
   const bool stop_at_first_solution_;
+  const bool is_core_feasibility_;
   Model local_model_;
+  CpModelProto model_proto_without_objective_;
 
   // The first chunk is special. It is the one in which we load the model and
   // try to follow the hint.
